@@ -67,19 +67,67 @@ from app.utils.logging_utils import configure_terminal_logger
 from app.utils import utils
 
 st.set_page_config(
-    page_title="MoneyPrinterTurbo",
+    page_title="MPT",
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="auto",
     menu_items={
         "Report a bug": "https://github.com/harry0703/MoneyPrinterTurbo/issues",
-        "About": "# MoneyPrinterTurbo\nSimply provide a topic or keyword for a video, and it will "
+        "About": "# MPT\nSimply provide a topic or keyword for a video, and it will "
         "automatically generate the video copy, video materials, video subtitles, "
         "and video background music before synthesizing a high-definition short "
         "video.\n\nhttps://github.com/harry0703/MoneyPrinterTurbo",
     },
 )
 
+# --- LOGIN SYSTEM ---
+env_path = os.path.join(root_dir, ".env")
+if os.path.exists(env_path):
+    with open(env_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, v = line.split("=", 1)
+                os.environ[k.strip()] = v.strip()
+
+MPT_USERNAME = os.environ.get("MPT_USERNAME")
+MPT_PASSWORD = os.environ.get("MPT_PASSWORD")
+
+if MPT_USERNAME and MPT_PASSWORD:
+    # Check session or cookie
+    is_auth = st.session_state.get("authenticated", False)
+    if not is_auth:
+        cookies = st.context.headers.get("Cookie") or st.context.headers.get("cookie") or ""
+        if "mpt_auth_token=valid" in cookies:
+            st.session_state["authenticated"] = True
+            is_auth = True
+
+    if not is_auth:
+        st.markdown("<h2 style='text-align: center; margin-top: 50px;'>Login to MPT</h2>", unsafe_allow_html=True)
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            with st.form("login_form"):
+                user = st.text_input("Username")
+                pwd = st.text_input("Password", type="password")
+                submit = st.form_submit_button("Login", use_container_width=True)
+                if submit:
+                    if user == MPT_USERNAME and pwd == MPT_PASSWORD:
+                        st.session_state["authenticated"] = True
+                        st.session_state["set_auth_cookie"] = True
+                        st.rerun()
+                    else:
+                        st.error("Invalid username or password")
+        st.stop()
+
+    if st.session_state.get("set_auth_cookie"):
+        import streamlit.components.v1 as components
+        components.html("""
+        <script>
+            window.parent.document.cookie = "mpt_auth_token=valid; path=/; max-age=2592000; samesite=strict";
+        </script>
+        """, height=0)
+        st.session_state["set_auth_cookie"] = False
+# --- END LOGIN SYSTEM ---
 
 # Streamlit 1.59 会在页面右上角默认展示 Deploy、skills nudge 等平台入口。
 # MoneyPrinterTurbo 是面向终端用户的本地工具，这些入口会造成顶部大块空白，
@@ -1631,23 +1679,23 @@ def _render_task_restore_dialog(task_id):
         st.rerun(scope="app")
 
 
-def _dismiss_settings_dialog():
-    """关闭设置弹窗，并确保下一次整页 rerun 不会再次自动打开。"""
-    st.session_state["settings_dialog_open"] = False
+def _close_settings_page():
+    """关闭设置页面，并确保返回主页面。"""
+    st.session_state["current_page"] = "main"
 
 
-def _open_settings_dialog(target_tab=None):
-    """打开设置弹窗，并可直接定位到指定业务标签页。"""
-    st.session_state["settings_dialog_open"] = True
+def _open_settings_page(target_tab=None):
+    """打开设置页面，并可直接定位到指定业务标签页。"""
+    st.session_state["current_page"] = "settings"
     if target_tab:
         # 这里只保存稳定的业务 ID，不保存翻译文本；真正创建 tabs 前再根据
         # 当前界面语言解析 label，避免用户切换语言后旧文案成为非法选项。
         st.session_state["settings_dialog_target_tab"] = target_tab
 
 
-def _open_material_settings_dialog():
+def _open_settings_page_to_material():
     """供视频来源组件回调使用：直接打开素材服务设置。"""
-    _open_settings_dialog("material")
+    _open_settings_page("material")
 
 
 def _render_brand(available_update: str | None = None):
@@ -1669,12 +1717,12 @@ def _render_brand(available_update: str | None = None):
     st.markdown(
         f"""
         <h1 class="mpt-brand">
-            <span class="mpt-brand__name">MoneyPrinterTurbo</span>
+            <span class="mpt-brand__name">MPT</span>
             <a class="mpt-brand__version"
                href="https://github.com/harry0703/MoneyPrinterTurbo"
                target="_blank"
                rel="noopener noreferrer"
-               aria-label="Open MoneyPrinterTurbo on GitHub"
+               aria-label="Open MPT on GitHub"
                title="Open project on GitHub">v{html.escape(str(config.project_version))}</a>
             {update_link}
         </h1>
@@ -1694,7 +1742,7 @@ def _render_pending_version_check():
     _render_brand()
 
 
-def _render_top_bar():
+def _render_top_bar(is_main_page=True):
     """渲染品牌、任务管理、设置和语言切换组成的页面顶部栏。"""
     # 顶部栏分为品牌区和操作区两个独立区域。窄屏下由 Streamlit
     # 将两个区域整体换行，操作区内部再根据剩余宽度自动换行。
@@ -1723,14 +1771,24 @@ def _render_top_bar():
         ):
             _render_task_manager_entry()
 
-            st.button(
-                tr("Settings"),
-                key="open_settings_dialog_button",
-                type="secondary",
-                icon=":material/settings:",
-                width="content",
-                on_click=_open_settings_dialog,
-            )
+            if is_main_page:
+                st.button(
+                    tr("Settings"),
+                    key="open_settings_page_button",
+                    type="secondary",
+                    icon=":material/settings:",
+                    width="content",
+                    on_click=_open_settings_page,
+                )
+            else:
+                st.button(
+                    "Back",
+                    key="close_settings_page_button",
+                    type="secondary",
+                    icon=":material/arrow_back:",
+                    width="content",
+                    on_click=_close_settings_page,
+                )
 
             language_codes = list(locales.keys())
             selected_index = 0
@@ -3059,20 +3117,11 @@ def _render_key_backup_settings(panel):
 
 
 # -----------------------------------------------------------------------------
-# 设置与提示词弹窗
+# 设置与提示词页面
 # -----------------------------------------------------------------------------
 
 
-# 设置属于低频操作，使用中等尺寸 Dialog 避免长期占用主页面纵向空间，
-# 同时控制阅读行宽，避免弹窗在宽屏设备上显得过于松散。
-# Dialog 继承 fragment 行为，内部控件交互只重绘弹窗；函数末尾单独保存配置，
-# 关闭时通过回调触发整页同步，确保生成流程读取最新 Provider 和界面设置。
-@st.dialog(
-    tr("Settings"),
-    width="medium",
-    on_dismiss=_dismiss_settings_dialog,
-)
-def _render_settings_dialog():
+def _render_settings_page():
     with st.container():
         # 历史 hide_config 只用于隐藏旧基础设置面板。改为固定设置入口后，该值
         # 不再有用户可见意义，统一迁移为 false，避免旧配置影响后续版本。
@@ -4877,7 +4926,7 @@ def _render_script_settings(panel, params):
                         tr("Configure LLM"),
                         key="open_llm_settings_from_subject",
                         type="tertiary",
-                        on_click=_open_settings_dialog,
+                        on_click=_open_settings_page,
                         args=("llm",),
                     )
                 params.video_subject = st.text_area(
@@ -5086,7 +5135,7 @@ def _render_video_settings(panel, params):
                 key="video_source_select",
                 format_func=video_source_labels.get,
                 settings_label=tr("Configure Material Sources"),
-                on_settings=_open_material_settings_dialog,
+                on_settings=_open_settings_page_to_material,
             )
             _set_runtime_config("app", "video_source", params.video_source)
 
@@ -8181,10 +8230,14 @@ def _render_generation_controls(
 
 def _render_application():
     """按固定顺序渲染顶部栏、弹窗、生成表单和任务结果。"""
-    _render_top_bar()
+    current_page = st.session_state.get("current_page", "main")
+    
+    if current_page == "settings":
+        _render_top_bar(is_main_page=False)
+        _render_settings_page()
+        return
 
-    if st.session_state.get("settings_dialog_open", False):
-        _render_settings_dialog()
+    _render_top_bar(is_main_page=True)
 
     if _apply_pending_settings_preset():
         st.success(tr("Settings Preset Imported"))

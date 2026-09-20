@@ -418,6 +418,7 @@
     "OFox Upstream Vendor Help": "Nhà cung cấp thượng nguồn phục vụ việc tạo video OFox. BytePlus (quốc tế) là mặc định với chính sách nội dung nhất quán; Volcano Engine là nhà cung cấp Trung Quốc đại lục; Tự động để gateway OFox cân bằng tải giữa các nhà cung cấp.",
     "OFox Vendor BytePlus": "BytePlus (quốc tế, mặc định)",
     "OFox Vendor Volcengine": "Volcano Engine (Trung Quốc đại lục)",
-    "OFox Vendor Auto": "Tự động (gateway cân bằng tải)"
+    "OFox Vendor Auto": "Tự động (gateway cân bằng tải)",
+    "llm_provider_tips.moonshot": "##### Cấu hình Kimi / Moonshot\n- **Khóa API**: Đăng ký qua [liên kết của MoneyPrinterTurbo (nhận ưu đãi 10% hạn mức API cho lần nạp đầu)]({api_key_url}) và tạo khóa trong bảng điều khiển\n- **Url Cơ Bản**: Mặc định là `{default_base_url}`\n- **Tên Mô Hình**: Mặc định là `{default_model}`; xem [danh sách mô hình]({model_docs_url})\n\nLý do khuyên dùng:\n- **Phù hợp với luồng tạo video**: giúp tạo kịch bản, trích xuất từ khóa tìm kiếm cảnh quay, và cải thiện độ chuẩn xác của video đầu ra\n- **Khả năng xử lý ngữ cảnh dài tốt**: hữu ích cho các chủ đề dài, kịch bản hàng loạt và câu lệnh phức tạp\n- **Ưu đãi độc quyền cho người dùng mới**: nhận thêm hạn mức API tương đương 10% số tiền nạp thành công lần đầu, tối đa 1.000 CNY; ưu đãi kết thúc vào 30/9/2026"
   }
 }

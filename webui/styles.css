@@ -1,3 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Apply Inter to container and text tags. 
+   Avoid wildcards like [class*="st-"] because they directly target and override 
+   Streamlit's internal icon <span> elements. By applying to parents (like button), 
+   inner icon spans can still safely use their explicit Material fonts. */
+html, body, .stApp, 
+p, h1, h2, h3, h4, h5, h6, 
+label, button, input, textarea, select, option, a, li, th, td, 
+div.stMarkdown, div.stText {
+    font-family: 'Inter', sans-serif !important;
+}
+
 header[data-testid="stHeader"],
 div[data-testid="stToolbar"],
 div[data-testid="stDecoration"],
@@ -136,7 +149,7 @@ div[class*="st-key-voice_mode_control"] [role="radiogroup"] > button p {
 }
 
 .mpt-brand__version:focus-visible {
-    outline: 2px solid rgba(255, 75, 75, 0.48);
+    outline: 2px solid rgba(124, 58, 237, 0.48);
     outline-offset: 2px;
 }
 
@@ -146,9 +159,10 @@ div[class*="st-key-voice_mode_control"] [role="radiogroup"] > button p {
     flex: 0 0 auto;
     font-size: 0.875rem;
     font-weight: 600;
-    color: #d94848 !important;
+    color: #F43F5E !important;
     text-decoration: none !important;
     white-space: nowrap;
+    transition: all 0.2s ease-in-out;
 }
 
 .mpt-brand__update:hover {
@@ -157,14 +171,8 @@ div[class*="st-key-voice_mode_control"] [role="radiogroup"] > button p {
 }
 
 .mpt-brand__update:focus-visible {
-    outline: 2px solid rgba(255, 75, 75, 0.48);
+    outline: 2px solid rgba(244, 63, 94, 0.48);
     outline-offset: 2px;
-}
-
-@media (prefers-color-scheme: dark) {
-    .mpt-brand__update {
-        color: #ff6b6b !important;
-    }
 }
 
 /* Streamlit 会自动给 h1 追加一个标题锚点。品牌区已有版本号项目链接，额外的
