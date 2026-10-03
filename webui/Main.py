@@ -71,13 +71,6 @@ st.set_page_config(
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="auto",
-    menu_items={
-        "Report a bug": "https://github.com/harry0703/MoneyPrinterTurbo/issues",
-        "About": "# MPT\nSimply provide a topic or keyword for a video, and it will "
-        "automatically generate the video copy, video materials, video subtitles, "
-        "and video background music before synthesizing a high-definition short "
-        "video.\n\nhttps://github.com/harry0703/MoneyPrinterTurbo",
-    },
 )
 
 # --- LOGIN SYSTEM ---
@@ -1718,12 +1711,7 @@ def _render_brand(available_update: str | None = None):
         f"""
         <h1 class="mpt-brand">
             <span class="mpt-brand__name">MPT</span>
-            <a class="mpt-brand__version"
-               href="https://github.com/harry0703/MoneyPrinterTurbo"
-               target="_blank"
-               rel="noopener noreferrer"
-               aria-label="Open MPT on GitHub"
-               title="Open project on GitHub">v{html.escape(str(config.project_version))}</a>
+            <span class="mpt-brand__version">v{html.escape(str(config.project_version))}</span>
             {update_link}
         </h1>
         """,
