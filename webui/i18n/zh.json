@@ -1,6 +1,13 @@
 {
   "Language": "简体中文",
   "Translation": {
+    "Home": "首页",
+    "Tasks": "任务",
+    "New Video": "新建视频",
+    "Create Video": "创建视频",
+    "No Videos Yet": "暂无视频，快来创建您的第一个视频吧！",
+    "Previous": "上一步",
+    "Next": "下一步",
     "YouTube Audience": "YouTube 受众",
     "Made for Kids": "是，面向儿童",
     "Not Made for Kids": "否，不面向儿童",

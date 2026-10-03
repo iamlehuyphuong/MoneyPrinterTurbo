@@ -70,7 +70,7 @@ st.set_page_config(
     page_title="MPT",
     page_icon="🤖",
     layout="wide",
-    initial_sidebar_state="auto",
+    initial_sidebar_state="expanded",
 )
 
 # --- LOGIN SYSTEM ---
@@ -1674,7 +1674,7 @@ def _render_task_restore_dialog(task_id):
 
 def _close_settings_page():
     """关闭设置页面，并确保返回主页面。"""
-    st.session_state["current_page"] = "main"
+    st.session_state["current_page"] = "home"
 
 
 def _open_settings_page(target_tab=None):
@@ -1915,7 +1915,7 @@ def render_onboarding_tour():
     # 新用户理解完整流程，也不会把引导状态与 Streamlit 的动态组件生命周期耦合。
     steps = [
         Tour.bind(
-            "open_settings_dialog_button",
+            "nav_settings",
             title=tr("Onboarding Model Settings Title"),
             desc=tr("Onboarding Model Settings Description"),
             side="bottom",
@@ -3110,9 +3110,9 @@ def _render_key_backup_settings(panel):
 
 
 def _render_settings_page():
+    with st.container(key="page_header"):
+        st.header(tr("Settings"))
     with st.container():
-        # 历史 hide_config 只用于隐藏旧基础设置面板。改为固定设置入口后，该值
-        # 不再有用户可见意义，统一迁移为 false，避免旧配置影响后续版本。
         _set_runtime_config("app", "hide_config", False)
         settings_tab_labels = [
             tr("LLM Settings Tab"),
@@ -8216,16 +8216,238 @@ def _render_generation_controls(
     return start_button
 
 
-def _render_application():
-    """按固定顺序渲染顶部栏、弹窗、生成表单和任务结果。"""
-    current_page = st.session_state.get("current_page", "main")
-    
-    if current_page == "settings":
-        _render_top_bar(is_main_page=False)
-        _render_settings_page()
+def _navigate_to(page):
+    st.session_state["current_page"] = page
+
+
+def _navigate_to_create():
+    st.session_state["current_page"] = "create"
+    st.session_state["wizard_step"] = 0
+
+
+def _wizard_next():
+    step = st.session_state.get("wizard_step", 0)
+    if step < 3:
+        st.session_state["wizard_step"] = step + 1
+
+
+def _wizard_prev():
+    step = st.session_state.get("wizard_step", 0)
+    if step > 0:
+        st.session_state["wizard_step"] = step - 1
+
+
+def _wizard_go_to(step):
+    st.session_state["wizard_step"] = step
+
+
+def _render_sidebar():
+    current_page = st.session_state.get("current_page", "home")
+    with st.sidebar:
+        st.markdown(
+            f"""
+            <h1 class="mpt-brand mpt-brand--sidebar">
+                <span class="mpt-brand__name">MPT</span>
+                <span class="mpt-brand__version">v{html.escape(str(config.project_version))}</span>
+            </h1>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.markdown("---")
+
+        if st.button(
+            tr("Home"),
+            key="nav_home",
+            icon=":material/home:",
+            use_container_width=True,
+            type="primary" if current_page == "home" else "secondary",
+        ):
+            _navigate_to("home")
+            st.rerun()
+
+        if st.button(
+            tr("Tasks"),
+            key="nav_tasks",
+            icon=":material/task:",
+            use_container_width=True,
+            type="primary" if current_page == "tasks" else "secondary",
+        ):
+            _navigate_to("tasks")
+            st.rerun()
+
+        if st.button(
+            tr("Settings"),
+            key="nav_settings",
+            icon=":material/settings:",
+            use_container_width=True,
+            type="primary" if current_page == "settings" else "secondary",
+        ):
+            _navigate_to("settings")
+            st.rerun()
+
+        st.markdown("---")
+
+        language_codes = list(locales.keys())
+        selected_index = 0
+        for i, code in enumerate(language_codes):
+            if code == st.session_state.get("ui_language", ""):
+                selected_index = i
+
+        selected_language_code = st.selectbox(
+            "Language / 语言",
+            options=language_codes,
+            index=selected_index,
+            format_func=lambda code: locales[code].get("Language", code),
+            key="sidebar_language_selector",
+            label_visibility="collapsed",
+        )
+        if selected_language_code:
+            previous_language = st.session_state.get("ui_language", "")
+            if selected_language_code != previous_language:
+                logger.info(
+                    "UI language changed by user: "
+                    f"previous_language={previous_language or '<empty>'}, "
+                    f"selected_language={selected_language_code}"
+                )
+                st.session_state["ui_language"] = selected_language_code
+                _set_runtime_config("ui", "language", selected_language_code)
+                _save_runtime_config()
+                for content_key in ("video_subject", "video_script", "video_terms"):
+                    if content_key in st.session_state:
+                        st.session_state[content_key] = st.session_state[content_key]
+                st.rerun()
+
+
+def _render_home_page():
+    with st.container(key="page_header"):
+        header_cols = st.columns([4, 1], vertical_alignment="center")
+        with header_cols[0]:
+            st.header(tr("Home"))
+        with header_cols[1]:
+            if st.button(
+                tr("New Video"),
+                key="new_video_button",
+                type="primary",
+                icon=":material/add:",
+                use_container_width=True,
+            ):
+                _navigate_to_create()
+                st.rerun()
+
+    tasks = _collect_task_summaries(limit=50)
+    completed_tasks = [
+        t for t in tasks
+        if _task_state_filter_key(t) == "complete" and t.get("video_file")
+    ]
+
+    if not completed_tasks:
+        st.info(tr("No Videos Yet"))
         return
 
-    _render_top_bar(is_main_page=True)
+    cols_per_row = 3
+    for row_start in range(0, len(completed_tasks), cols_per_row):
+        row_tasks = completed_tasks[row_start:row_start + cols_per_row]
+        cols = st.columns(cols_per_row)
+        for col, task in zip(cols, row_tasks):
+            with col:
+                with st.container(border=True, key=f"home_video_{task['task_id']}"):
+                    if task["video_file"] and os.path.isfile(task["video_file"]):
+                        st.video(task["video_file"])
+                    st.markdown(f"**{_format_task_subject(task['subject'], max_length=40)}**")
+                    st.caption(_format_task_time(task["mtime"]))
+
+                    action_cols = st.columns(3)
+                    with action_cols[0]:
+                        if st.button(
+                            tr("Open Task Folder"),
+                            key=f"home_open_{task['task_id']}",
+                            icon=":material/folder_open:",
+                            use_container_width=True,
+                        ):
+                            _open_task_path(task["task_path"])
+                    with action_cols[1]:
+                        has_restore = os.path.isfile(
+                            os.path.join(task["task_path"], "script.json")
+                        )
+                        if st.button(
+                            tr("Regenerate Task"),
+                            key=f"home_regen_{task['task_id']}",
+                            icon=":material/replay:",
+                            use_container_width=True,
+                            disabled=not has_restore,
+                        ):
+                            _queue_task_restore(task["task_id"])
+                    with action_cols[2]:
+                        if task["video_file"] and os.path.isfile(task["video_file"]):
+                            download_name = _build_video_download_name(
+                                task["subject"], 1, 1,
+                            )
+                            with open(task["video_file"], "rb") as vf:
+                                st.download_button(
+                                    tr("Download Video"),
+                                    data=vf,
+                                    file_name=download_name,
+                                    mime="video/mp4",
+                                    key=f"home_dl_{task['task_id']}",
+                                    icon=":material/download:",
+                                    use_container_width=True,
+                                    on_click="ignore",
+                                )
+
+
+def _render_tasks_page():
+    with st.container(key="page_header"):
+        st.header(tr("Tasks"))
+    _render_task_manager_panel()
+
+
+WIZARD_STEPS = [
+    "Video Script Settings",
+    "Video Settings",
+    "Audio Settings",
+    "Subtitle Settings",
+]
+
+
+def _render_wizard_stepper(current_step):
+    step_labels = [tr(label) for label in WIZARD_STEPS]
+    cols = st.columns(len(step_labels))
+    for i, (col, label) in enumerate(zip(cols, step_labels)):
+        with col:
+            if i < current_step:
+                icon = ":material/check_circle:"
+                btn_type = "tertiary"
+            elif i == current_step:
+                icon = ":material/radio_button_checked:"
+                btn_type = "primary"
+            else:
+                icon = ":material/radio_button_unchecked:"
+                btn_type = "tertiary"
+            if st.button(
+                label,
+                key=f"wizard_step_btn_{i}",
+                icon=icon,
+                type=btn_type,
+                use_container_width=True,
+            ):
+                _wizard_go_to(i)
+                st.rerun()
+
+
+def _render_create_page():
+    with st.container(key="page_header"):
+        header_cols = st.columns([4, 1], vertical_alignment="center")
+        with header_cols[0]:
+            st.header(tr("Create Video"))
+        with header_cols[1]:
+            if st.button(
+                tr("Home"),
+                key="back_to_home",
+                icon=":material/arrow_back:",
+                use_container_width=True,
+            ):
+                _navigate_to("home")
+                st.rerun()
 
     if _apply_pending_settings_preset():
         st.success(tr("Settings Preset Imported"))
@@ -8238,38 +8460,96 @@ def _render_application():
     if restore_applied or restore_succeeded:
         st.success(tr("Task Configuration Loaded"))
 
-    with st.container(key="main_settings_grid"):
-        panel = st.columns(4)
-    left_panel = panel[0]
-    middle_panel = panel[1]
-    audio_panel = panel[2]
-    right_panel = panel[3]
+    current_step = st.session_state.get("wizard_step", 0)
+
+    hide_steps_css = ""
+    for i in range(4):
+        if i != current_step:
+            hide_steps_css += f'div[class*="st-key-wizard_step_{i}"] {{ display: none !important; }}\n'
+    st.markdown(f"<style>{hide_steps_css}</style>", unsafe_allow_html=True)
+
+    with st.container(key="wizard_stepper"):
+        _render_wizard_stepper(current_step)
 
     params = VideoParams(video_subject="")
     params.match_materials_to_script = bool(
         st.session_state.get("match_materials_to_script", False)
     )
-    _render_script_settings(left_panel, params)
 
-    uploaded_files = _render_video_settings(middle_panel, params)
-    uploaded_audio_file, uploaded_bgm_file, voice_mode = _render_audio_settings(
-        audio_panel, params
-    )
+    with st.container(key="main_settings_grid"):
+        with st.container(key="wizard_step_0"):
+            step0_panel = st.columns(1)[0]
+            _render_script_settings(step0_panel, params)
 
-    _render_subtitle_settings(right_panel, params)
+        with st.container(key="wizard_step_1"):
+            step1_panel = st.columns(1)[0]
+            uploaded_files = _render_video_settings(step1_panel, params)
 
-    generation_submitted = _render_generation_controls(
-        params,
-        uploaded_files,
-        uploaded_audio_file,
-        uploaded_bgm_file,
-        voice_mode,
-    )
+        with st.container(key="wizard_step_2"):
+            step2_panel = st.columns(1)[0]
+            uploaded_audio_file, uploaded_bgm_file, voice_mode = _render_audio_settings(
+                step2_panel, params
+            )
 
-    # 生成分支在启动后台线程前已经请求过保存。普通控件交互继续请求非阻塞保存；
-    # 如果后台任务正在使用配置，配置层会在任务结束时自动应用并落盘最新值。
-    if not generation_submitted:
+        with st.container(key="wizard_step_3"):
+            step3_panel = st.columns(1)[0]
+            _render_subtitle_settings(step3_panel, params)
+
+    with st.container(key="wizard_nav"):
+        nav_cols = st.columns([1, 3, 1])
+        with nav_cols[0]:
+            if current_step > 0:
+                if st.button(
+                    tr("Previous"),
+                    key="wizard_prev",
+                    icon=":material/arrow_back:",
+                    use_container_width=True,
+                ):
+                    _wizard_prev()
+                    st.rerun()
+        with nav_cols[2]:
+            if current_step < 3:
+                if st.button(
+                    tr("Next"),
+                    key="wizard_next",
+                    icon=":material/arrow_forward:",
+                    type="primary",
+                    use_container_width=True,
+                ):
+                    _wizard_next()
+                    st.rerun()
+
+    if current_step == 3:
+        generation_submitted = _render_generation_controls(
+            params,
+            uploaded_files,
+            uploaded_audio_file,
+            uploaded_bgm_file,
+            voice_mode,
+        )
+        if not generation_submitted:
+            _save_runtime_config()
+    else:
         _save_runtime_config()
+
+
+def _render_application():
+    current_page = st.session_state.get("current_page", "home")
+    _render_sidebar()
+
+    if current_page == "settings":
+        _render_settings_page()
+    elif current_page == "tasks":
+        _render_tasks_page()
+    elif current_page == "create":
+        _render_create_page()
+    else:
+        _render_home_page()
+
+    restore_candidate_id = st.session_state.get("task_restore_candidate_id")
+    if restore_candidate_id and current_page not in ("create",):
+        _navigate_to_create()
+        st.rerun()
 
 
 _render_application()

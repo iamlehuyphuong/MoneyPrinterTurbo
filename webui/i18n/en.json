@@ -1,6 +1,13 @@
 {
   "Language": "English",
   "Translation": {
+    "Home": "Home",
+    "Tasks": "Tasks",
+    "New Video": "New Video",
+    "Create Video": "Create Video",
+    "No Videos Yet": "No videos yet. Create your first video!",
+    "Previous": "Previous",
+    "Next": "Next",
     "YouTube Audience": "YouTube audience",
     "Made for Kids": "Yes, made for kids",
     "Not Made for Kids": "No, not made for kids",

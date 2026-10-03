@@ -1,6 +1,13 @@
 {
   "Language": "Tiếng Việt",
   "Translation": {
+    "Home": "Trang chủ",
+    "Tasks": "Tác vụ",
+    "New Video": "Video mới",
+    "Create Video": "Tạo Video",
+    "No Videos Yet": "Chưa có video nào. Hãy tạo video đầu tiên!",
+    "Previous": "Quay lại",
+    "Next": "Tiếp theo",
     "Batch Material Reuse Warning": "Video {index} đã sử dụng lại {count} clip nguồn từ các video trước: tư liệu hiện có không đủ để tránh hoàn toàn việc sử dụng lại với thứ tự và thời lượng hiện tại.",
     "YouTube Audience": "Đối tượng người xem YouTube",
     "Made for Kids": "Có, dành cho trẻ em",

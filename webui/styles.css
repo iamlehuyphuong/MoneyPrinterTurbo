@@ -11,7 +11,22 @@ div.stMarkdown, div.stText {
     font-family: 'Inter', sans-serif !important;
 }
 
-header[data-testid="stHeader"],
+header[data-testid="stHeader"] {
+    background: transparent !important;
+    height: auto !important;
+}
+
+/* ---- Dark Panel Layout ---- */
+.stApp,
+[data-testid="stAppViewContainer"] {
+    background-color: #0A0A18 !important;
+}
+
+section[data-testid="stMain"] {
+    background-color: #0A0A18 !important;
+    padding: 1rem 1rem 1rem 0.25rem !important;
+}
+
 div[data-testid="stToolbar"],
 div[data-testid="stDecoration"],
 div[data-testid="stStatusWidget"],
@@ -21,7 +36,12 @@ div[data-testid="stSkillsNudge"] {
 }
 
 div[data-testid="stMainBlockContainer"] {
-    padding-top: 0.5rem !important;
+    background-color: #151530 !important;
+    border-radius: 12px !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 1rem !important;
+    min-height: calc(100vh - 2rem) !important;
 }
 
 h1 {
@@ -492,3 +512,231 @@ div[class*="st-key-task_row_"] button[kind="secondary"] p {
         min-width: 1.75rem !important;
     }
 }
+
+/* --- Sidebar Navigation --- */
+.mpt-brand--sidebar {
+    font-size: 1.5rem !important;
+}
+
+.mpt-brand--sidebar .mpt-brand__name {
+    font-size: 1.75rem !important;
+}
+
+.mpt-brand--sidebar .mpt-brand__version {
+    font-size: 0.8rem !important;
+}
+
+section[data-testid="stSidebar"] {
+    min-width: 220px !important;
+    max-width: 260px !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 1rem 0.25rem 1rem 1rem !important;
+}
+
+section[data-testid="stSidebar"] > div:first-child {
+    background-color: #151530 !important;
+    border-radius: 12px !important;
+    padding: 1rem !important;
+    height: 100% !important;
+}
+
+section[data-testid="stSidebar"] hr {
+    margin: 0.5rem 0 !important;
+}
+
+section[data-testid="stSidebar"] button[kind="secondary"],
+section[data-testid="stSidebar"] button[kind="primary"] {
+    display: flex !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+}
+
+section[data-testid="stSidebar"] button[kind="secondary"] > div,
+section[data-testid="stSidebar"] button[kind="primary"] > div {
+    display: flex !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+}
+
+section[data-testid="stSidebar"] button[kind="secondary"] span[data-has-shortcut],
+section[data-testid="stSidebar"] button[kind="primary"] span[data-has-shortcut] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+}
+
+section[data-testid="stSidebar"] button[kind="secondary"] span[data-has-shortcut] > span:first-child,
+section[data-testid="stSidebar"] button[kind="primary"] span[data-has-shortcut] > span:first-child {
+    flex: 0 0 1.25rem !important;
+    width: 1.25rem !important;
+    text-align: center !important;
+}
+
+section[data-testid="stSidebar"] button[kind="secondary"] span[data-has-shortcut] > p,
+section[data-testid="stSidebar"] button[kind="primary"] span[data-has-shortcut] > p {
+    flex: 1 !important;
+    text-align: left !important;
+    margin: 0 !important;
+}
+
+/* --- Wizard Stepper --- */
+div[class*="st-key-wizard_stepper"] {
+    margin-bottom: 1rem !important;
+}
+
+div[class*="st-key-wizard_stepper"] button {
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+}
+
+div[class*="st-key-wizard_nav"] {
+    margin-top: 1.5rem !important;
+    padding-top: 1rem !important;
+    border-top: 1px solid rgba(128, 128, 128, 0.2) !important;
+}
+
+/* --- Home Video Grid --- */
+div[class*="st-key-home_video_"] video {
+    border-radius: 8px !important;
+    max-height: 220px !important;
+    object-fit: cover !important;
+}
+
+div[class*="st-key-home_video_"] button {
+    font-size: 0.75rem !important;
+    min-height: 1.75rem !important;
+    height: 1.75rem !important;
+    padding: 0.1rem 0.3rem !important;
+}
+
+div[class*="st-key-home_video_"] button p {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+}
+
+div[class*="st-key-home_video_"] button[kind="secondary"] span[data-has-shortcut] {
+    width: 100% !important;
+    gap: 0 !important;
+    justify-content: center !important;
+}
+
+/* --- Page Header --- */
+div[class*="st-key-page_header"] {
+    min-height: 56px !important;
+    max-height: 56px !important;
+    overflow: hidden !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    margin-bottom: 1rem !important;
+}
+
+div[class*="st-key-page_header"] h1,
+div[class*="st-key-page_header"] h2,
+div[class*="st-key-page_header"] [data-testid="stHeading"] {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 1.5rem !important;
+}
+
+div[class*="st-key-page_header"] [data-testid="stElementContainer"] {
+    margin: 0 !important;
+}
+
+/* ==========================================================================
+   UI/UX Pro Max Polish (No Color Palette Changes)
+   ========================================================================== */
+
+/* 1. Global Transitions & Cursor */
+button, input, textarea, select, a, div[data-baseweb="select"], div[data-baseweb="input"] {
+    transition: all 0.2s ease-in-out !important;
+}
+[data-testid="stBaseButton-primary"],
+[data-testid="stBaseButton-secondary"],
+button[kind="primary"],
+button[kind="secondary"] {
+    cursor: pointer !important;
+    border-radius: 8px !important;
+}
+
+/* 2. Button Hover & Active States */
+[data-testid="stBaseButton-primary"]:hover,
+[data-testid="stBaseButton-secondary"]:hover,
+button[kind="primary"]:hover,
+button[kind="secondary"]:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+[data-testid="stBaseButton-primary"]:active,
+[data-testid="stBaseButton-secondary"]:active,
+button[kind="primary"]:active,
+button[kind="secondary"]:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* 3. Inputs & TextAreas Border Radius & Focus */
+.stTextInput input, .stTextArea textarea, .stSelectbox div[data-baseweb="select"] {
+    border-radius: 8px !important;
+    transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out !important;
+}
+.stTextInput input:focus, .stTextArea textarea:focus, .stSelectbox div[data-baseweb="select"]:focus-within {
+    box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 15%, transparent) !important;
+}
+
+/* 4. Container Depth & Card Design */
+/* Apply subtle shadow to generic vertical blocks that look like cards */
+div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+    border-radius: 12px !important;
+    border: none !important;
+    transition: box-shadow 0.3s ease-in-out !important;
+}
+div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 5. Sidebar Polish */
+section[data-testid="stSidebar"] {
+    box-shadow: none !important;
+}
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+    background: #151530 !important;
+    border-radius: 12px !important;
+}
+section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+    gap: 0.5rem !important;
+}
+
+/* 6. Video Thumbnails Hover */
+div[class*="st-key-home_video_"] video {
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out !important;
+}
+div[class*="st-key-home_video_"] video:hover {
+    transform: scale(1.02) !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 7. Always Show Sidebar (Luôn hiển thị menu bar) */
+[data-testid="stSidebarCollapseButton"],
+section[data-testid="stSidebar"] button[kind="headerNoPadding"],
+[data-testid="collapsedControl"] {
+    display: none !important;
+}
+
+section[data-testid="stSidebar"] {
+    display: block !important;
+    visibility: visible !important;
+    transform: none !important;
+}
+
