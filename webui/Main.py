@@ -8232,11 +8232,13 @@ def _render_generation_controls(
 
 def _navigate_to(page):
     st.session_state["current_page"] = page
+    if "page_objects" in st.session_state and page in st.session_state["page_objects"]:
+        st.switch_page(st.session_state["page_objects"][page])
 
 
 def _navigate_to_create():
-    st.session_state["current_page"] = "create"
     st.session_state["wizard_step"] = 0
+    _navigate_to("create")
 
 
 def _wizard_next():
@@ -8298,6 +8300,16 @@ def _render_sidebar():
             st.rerun()
 
         if st.button(
+            tr("New Video"),
+            key="nav_create",
+            icon=":material/add_circle:",
+            use_container_width=True,
+            type="primary" if current_page == "create" else "secondary",
+        ):
+            _navigate_to_create()
+            st.rerun()
+
+        if st.button(
             tr("Tasks"),
             key="nav_tasks",
             icon=":material/task:",
@@ -8334,18 +8346,7 @@ def _render_sidebar():
 
 
 def _render_home_page():
-    if _render_page_header(
-        tr("Home"),
-        lambda: st.button(
-            tr("New Video"),
-            key="new_video_button",
-            type="primary",
-            icon=":material/add:",
-            use_container_width=True,
-        ),
-    ):
-        _navigate_to_create()
-        st.rerun()
+    _render_page_header(tr("Home"))
 
     tasks = _collect_task_summaries(limit=50)
     completed_tasks = [
@@ -8353,59 +8354,66 @@ def _render_home_page():
         if _task_state_filter_key(t) == "complete" and t.get("video_file")
     ]
 
-    if not completed_tasks:
-        st.info(tr("No Videos Yet"))
-        return
+    display_items = [{"type": "create"}] + completed_tasks
 
-    cols_per_row = 3
-    for row_start in range(0, len(completed_tasks), cols_per_row):
-        row_tasks = completed_tasks[row_start:row_start + cols_per_row]
+    cols_per_row = 5
+    for row_start in range(0, len(display_items), cols_per_row):
+        row_items = display_items[row_start:row_start + cols_per_row]
         cols = st.columns(cols_per_row)
-        for col, task in zip(cols, row_tasks):
+        for col, task in zip(cols, row_items):
             with col:
-                with st.container(border=True, key=f"home_video_{task['task_id']}"):
-                    if task["video_file"] and os.path.isfile(task["video_file"]):
-                        st.video(task["video_file"])
-                    st.markdown(f"**{_format_task_subject(task['subject'], max_length=40)}**")
-                    st.caption(_format_task_time(task["mtime"]))
-
-                    action_cols = st.columns(3)
-                    with action_cols[0]:
+                if task.get("type") == "create":
+                    with st.container(border=True, key="home_video_create"):
                         if st.button(
-                            tr("Open Task Folder"),
-                            key=f"home_open_{task['task_id']}",
-                            icon=":material/folder_open:",
+                            " ",
+                            key="home_create_btn_inner",
                             use_container_width=True,
                         ):
-                            _open_task_path(task["task_path"])
-                    with action_cols[1]:
-                        has_restore = os.path.isfile(
-                            os.path.join(task["task_path"], "script.json")
-                        )
-                        if st.button(
-                            tr("Regenerate Task"),
-                            key=f"home_regen_{task['task_id']}",
-                            icon=":material/replay:",
-                            use_container_width=True,
-                            disabled=not has_restore,
-                        ):
-                            _queue_task_restore(task["task_id"])
-                    with action_cols[2]:
+                            _navigate_to_create()
+                else:
+                    with st.container(border=True, key=f"home_video_{task['task_id']}"):
                         if task["video_file"] and os.path.isfile(task["video_file"]):
-                            download_name = _build_video_download_name(
-                                task["subject"], 1, 1,
+                            st.video(task["video_file"])
+                        st.markdown(f"**{_format_task_subject(task['subject'], max_length=40)}**")
+                        st.caption(_format_task_time(task["mtime"]))
+
+                        action_cols = st.columns(3)
+                        with action_cols[0]:
+                            if st.button(
+                                tr("Open Task Folder"),
+                                key=f"home_open_{task['task_id']}",
+                                icon=":material/folder_open:",
+                                use_container_width=True,
+                            ):
+                                _open_task_path(task["task_path"])
+                        with action_cols[1]:
+                            has_restore = os.path.isfile(
+                                os.path.join(task["task_path"], "script.json")
                             )
-                            with open(task["video_file"], "rb") as vf:
-                                st.download_button(
-                                    tr("Download Video"),
-                                    data=vf,
-                                    file_name=download_name,
-                                    mime="video/mp4",
-                                    key=f"home_dl_{task['task_id']}",
-                                    icon=":material/download:",
-                                    use_container_width=True,
-                                    on_click="ignore",
+                            if st.button(
+                                tr("Regenerate Task"),
+                                key=f"home_regen_{task['task_id']}",
+                                icon=":material/replay:",
+                                use_container_width=True,
+                                disabled=not has_restore,
+                            ):
+                                _queue_task_restore(task["task_id"])
+                        with action_cols[2]:
+                            if task["video_file"] and os.path.isfile(task["video_file"]):
+                                download_name = _build_video_download_name(
+                                    task["subject"], 1, 1,
                                 )
+                                with open(task["video_file"], "rb") as vf:
+                                    st.download_button(
+                                        tr("Download Video"),
+                                        data=vf,
+                                        file_name=download_name,
+                                        mime="video/mp4",
+                                        key=f"home_dl_{task['task_id']}",
+                                        icon=":material/download:",
+                                        use_container_width=True,
+                                        on_click="ignore",
+                                    )
 
 
 def _render_tasks_page():
@@ -8447,17 +8455,7 @@ def _render_wizard_stepper(current_step):
 
 
 def _render_create_page():
-    if _render_page_header(
-        tr("Create Video"),
-        lambda: st.button(
-            tr("Home"),
-            key="back_to_home",
-            icon=":material/arrow_back:",
-            use_container_width=True,
-        ),
-    ):
-        _navigate_to("home")
-        st.rerun()
+    _render_page_header(tr("Create Video"))
 
     if _apply_pending_settings_preset():
         st.success(tr("Settings Preset Imported"))
@@ -8544,22 +8542,33 @@ def _render_create_page():
 
 
 def _render_application():
-    current_page = st.session_state.get("current_page", "home")
-    _render_sidebar()
+    home_page = st.Page(_render_home_page, title=tr("Home"), url_path="home", default=True)
+    tasks_page = st.Page(_render_tasks_page, title=tr("Tasks"), url_path="tasks")
+    settings_page = st.Page(_render_settings_page, title=tr("Settings"), url_path="settings")
+    create_page = st.Page(_render_create_page, title=tr("Create Video"), url_path="create")
 
-    if current_page == "settings":
-        _render_settings_page()
-    elif current_page == "tasks":
-        _render_tasks_page()
-    elif current_page == "create":
-        _render_create_page()
-    else:
-        _render_home_page()
+    st.session_state["page_objects"] = {
+        "home": home_page,
+        "tasks": tasks_page,
+        "settings": settings_page,
+        "create": create_page,
+    }
+
+    pg = st.navigation(
+        [home_page, create_page, tasks_page, settings_page],
+        position="hidden"
+    )
+
+    current_page = getattr(pg, "url_path", "home")
+    st.session_state["current_page"] = current_page
+
+    _render_sidebar()
 
     restore_candidate_id = st.session_state.get("task_restore_candidate_id")
     if restore_candidate_id and current_page not in ("create",):
         _navigate_to_create()
-        st.rerun()
+
+    pg.run()
 
 
 _render_application()

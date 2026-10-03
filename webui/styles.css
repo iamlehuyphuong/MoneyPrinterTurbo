@@ -561,6 +561,11 @@ section[data-testid="stSidebar"] hr {
 
 /* Streamlit 1.59 selectbox = React Aria ComboBox (no more data-baseweb="select").
    The visible box (bg + border) is the Group container: [role="group"]. */
+section[data-testid="stSidebar"] [data-testid="stSelectbox"] {
+    margin-top: 2rem !important;
+    margin-bottom: 2rem !important;
+}
+
 section[data-testid="stSidebar"] [data-testid="stSelectbox"] [role="group"] {
     background-color: #1E1E3E !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
@@ -634,20 +639,91 @@ div[class*="st-key-wizard_nav"] {
 }
 
 /* --- Home Video Grid --- */
+/* The key class is on the inner stVerticalBlock, which dictates the size. */
+div[class*="st-key-home_video_"] {
+    aspect-ratio: 3 / 4 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+}
+
+div[class*="st-key-home_video_"] div[data-testid="stVideo"] {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+}
+
 div[class*="st-key-home_video_"] video {
     border-radius: 8px !important;
-    max-height: 220px !important;
+    height: 100% !important;
+    max-height: none !important;
     object-fit: cover !important;
 }
 
-div[class*="st-key-home_video_"] button {
+/* Create New Video Card inner button styling */
+div[data-testid="stVerticalBlockBorderWrapper"]:has(div[class*="st-key-home_video_create"]) {
+    border: none !important;
+}
+
+div[class*="st-key-home_video_create"] {
+    padding: 0 !important; /* Remove padding from container to let button stretch */
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+div[class*="st-key-home_video_create"] > div[data-testid="stElementContainer"] {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+div[class*="st-key-home_video_create"] div[data-testid="stButton"] {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    width: 100% !important;
+}
+
+div[class*="st-key-home_video_create"] button[kind="secondary"] {
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    width: 100% !important;
+    background: transparent !important;
+    border: 2px dashed rgba(255, 255, 255, 0.1) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+div[class*="st-key-home_video_create"] button[kind="secondary"]:hover {
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+div[class*="st-key-home_video_create"] button[kind="secondary"]::after {
+    content: "+";
+    font-size: 4rem;
+    font-weight: 300;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+div[class*="st-key-home_video_create"] button[kind="secondary"]:hover::after {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+div[class*="st-key-home_video_create"] button[kind="secondary"] p {
+    display: none !important;
+}
+
+div[class*="st-key-home_video_"]:not([class*="st-key-home_video_create"]) button {
     font-size: 0.75rem !important;
     min-height: 1.75rem !important;
     height: 1.75rem !important;
     padding: 0.1rem 0.3rem !important;
 }
 
-div[class*="st-key-home_video_"] button p {
+div[class*="st-key-home_video_"]:not([class*="st-key-home_video_create"]) button p {
     position: absolute !important;
     width: 1px !important;
     height: 1px !important;
@@ -659,7 +735,7 @@ div[class*="st-key-home_video_"] button p {
     white-space: nowrap !important;
 }
 
-div[class*="st-key-home_video_"] button[kind="secondary"] span[data-has-shortcut] {
+div[class*="st-key-home_video_"]:not([class*="st-key-home_video_create"]) button[kind="secondary"] span[data-has-shortcut] {
     width: 100% !important;
     gap: 0 !important;
     justify-content: center !important;
@@ -673,31 +749,42 @@ div[class*="st-key-page_header"] {
     overflow: hidden !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
     margin: 0 0 1rem 0 !important;
-    padding: 0 !important;
+    padding: 0 0 8px 0 !important;
     box-sizing: border-box !important;
     display: flex !important;
     align-items: center !important;
 }
 
-div[class*="st-key-page_header"] > div[data-testid="stVerticalBlock"],
-div[class*="st-key-page_header"] div[data-testid="stLayoutWrapper"] {
-    width: 100% !important;
-    height: 100% !important;
+/* Force all wrapper containers to be flex rows that fill height and center vertically */
+div[class*="st-key-page_header"] div[data-testid="stVerticalBlock"],
+div[class*="st-key-page_header"] div[data-testid="stVerticalBlockBorderWrapper"],
+div[class*="st-key-page_header"] div[data-testid="stLayoutWrapper"],
+div[class*="st-key-page_header"] div[data-testid="stHorizontalBlock"],
+div[class*="st-key-page_header"] div[data-testid="stColumn"],
+div[class*="st-key-page_header"] div[data-testid="stElementContainer"],
+div[class*="st-key-page_header"] div[data-testid="stMarkdownContainer"],
+div[class*="st-key-page_header"] div[data-testid="stMarkdown"] {
     display: flex !important;
-    justify-content: center !important;
+    height: 100% !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
     gap: 0 !important;
 }
 
 div[class*="st-key-page_header"] div[data-testid="stHorizontalBlock"] {
-    align-items: center !important;
-    height: 100% !important;
     width: 100% !important;
 }
 
-div[class*="st-key-page_header"] div[data-testid="stColumn"] {
-    display: flex !important;
-    align-items: center !important;
-    height: 100% !important;
+/* Let the title container justify to start */
+div[class*="st-key-page_header"] div[data-testid="stColumn"]:first-child {
+    justify-content: flex-start !important;
+}
+
+/* Let the action button container justify to end */
+div[class*="st-key-page_header"] div[data-testid="stColumn"]:last-child {
+    justify-content: flex-end !important;
 }
 
 div[class*="st-key-page_header"] h1,
@@ -713,18 +800,6 @@ div[class*="st-key-page_header"] [data-testid="stHeading"] {
     align-items: center !important;
 }
 
-div[class*="st-key-page_header"] [data-testid="stMarkdownContainer"] {
-    margin: 0 !important;
-    padding: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-}
-
-div[class*="st-key-page_header"] [data-testid="stElementContainer"] {
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
 div[class*="st-key-page_header"] button {
     margin: 0 !important;
     padding-top: 0 !important;
@@ -735,6 +810,8 @@ div[class*="st-key-page_header"] button {
 
 div[class*="st-key-page_header"] button p {
     font-size: 1rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 /* ==========================================================================
