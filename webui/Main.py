@@ -3109,9 +3109,23 @@ def _render_key_backup_settings(panel):
 # -----------------------------------------------------------------------------
 
 
-def _render_settings_page():
+def _render_page_header(title, action=None):
+    """Render a uniform page header: same DOM on every page so height and
+    title position match. `action` is an optional callable rendered in the
+    right column (e.g. a button); returns its result."""
+    result = None
     with st.container(key="page_header"):
-        st.header(tr("Settings"))
+        header_cols = st.columns([4, 1], vertical_alignment="center")
+        with header_cols[0]:
+            st.header(title, anchor=False)
+        with header_cols[1]:
+            if action is not None:
+                result = action()
+    return result
+
+
+def _render_settings_page():
+    _render_page_header(tr("Settings"))
     with st.container():
         _set_runtime_config("app", "hide_config", False)
         settings_tab_labels = [
@@ -8268,6 +8282,7 @@ def _render_sidebar():
             format_func=lambda code: locales[code].get("Language", code),
             key="sidebar_language_selector",
             label_visibility="collapsed",
+            filter_mode=None,
         )
 
         st.markdown("---")
@@ -8319,20 +8334,18 @@ def _render_sidebar():
 
 
 def _render_home_page():
-    with st.container(key="page_header"):
-        header_cols = st.columns([4, 1], vertical_alignment="center")
-        with header_cols[0]:
-            st.header(tr("Home"))
-        with header_cols[1]:
-            if st.button(
-                tr("New Video"),
-                key="new_video_button",
-                type="primary",
-                icon=":material/add:",
-                use_container_width=True,
-            ):
-                _navigate_to_create()
-                st.rerun()
+    if _render_page_header(
+        tr("Home"),
+        lambda: st.button(
+            tr("New Video"),
+            key="new_video_button",
+            type="primary",
+            icon=":material/add:",
+            use_container_width=True,
+        ),
+    ):
+        _navigate_to_create()
+        st.rerun()
 
     tasks = _collect_task_summaries(limit=50)
     completed_tasks = [
@@ -8396,8 +8409,7 @@ def _render_home_page():
 
 
 def _render_tasks_page():
-    with st.container(key="page_header"):
-        st.header(tr("Tasks"))
+    _render_page_header(tr("Tasks"))
     _render_task_manager_panel()
 
 
@@ -8435,19 +8447,17 @@ def _render_wizard_stepper(current_step):
 
 
 def _render_create_page():
-    with st.container(key="page_header"):
-        header_cols = st.columns([4, 1], vertical_alignment="center")
-        with header_cols[0]:
-            st.header(tr("Create Video"))
-        with header_cols[1]:
-            if st.button(
-                tr("Home"),
-                key="back_to_home",
-                icon=":material/arrow_back:",
-                use_container_width=True,
-            ):
-                _navigate_to("home")
-                st.rerun()
+    if _render_page_header(
+        tr("Create Video"),
+        lambda: st.button(
+            tr("Home"),
+            key="back_to_home",
+            icon=":material/arrow_back:",
+            use_container_width=True,
+        ),
+    ):
+        _navigate_to("home")
+        st.rerun()
 
     if _apply_pending_settings_preset():
         st.success(tr("Settings Preset Imported"))
