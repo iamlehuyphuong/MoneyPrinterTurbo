@@ -8255,6 +8255,23 @@ def _render_sidebar():
         )
         st.markdown("---")
 
+        language_codes = list(locales.keys())
+        selected_index = 0
+        for i, code in enumerate(language_codes):
+            if code == st.session_state.get("ui_language", ""):
+                selected_index = i
+
+        selected_language_code = st.selectbox(
+            "Language / 语言",
+            options=language_codes,
+            index=selected_index,
+            format_func=lambda code: locales[code].get("Language", code),
+            key="sidebar_language_selector",
+            label_visibility="collapsed",
+        )
+
+        st.markdown("---")
+
         if st.button(
             tr("Home"),
             key="nav_home",
@@ -8284,23 +8301,6 @@ def _render_sidebar():
         ):
             _navigate_to("settings")
             st.rerun()
-
-        st.markdown("---")
-
-        language_codes = list(locales.keys())
-        selected_index = 0
-        for i, code in enumerate(language_codes):
-            if code == st.session_state.get("ui_language", ""):
-                selected_index = i
-
-        selected_language_code = st.selectbox(
-            "Language / 语言",
-            options=language_codes,
-            index=selected_index,
-            format_func=lambda code: locales[code].get("Language", code),
-            key="sidebar_language_selector",
-            label_visibility="collapsed",
-        )
         if selected_language_code:
             previous_language = st.session_state.get("ui_language", "")
             if selected_language_code != previous_language:

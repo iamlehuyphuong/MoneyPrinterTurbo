@@ -516,14 +516,26 @@ div[class*="st-key-task_row_"] button[kind="secondary"] p {
 /* --- Sidebar Navigation --- */
 .mpt-brand--sidebar {
     font-size: 1.5rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    min-height: 64px !important;
+    max-height: 64px !important;
+    display: flex !important;
+    align-items: center !important;
 }
 
 .mpt-brand--sidebar .mpt-brand__name {
-    font-size: 1.75rem !important;
+    font-size: 1.5rem !important;
 }
 
 .mpt-brand--sidebar .mpt-brand__version {
-    font-size: 0.8rem !important;
+    font-size: 0.75rem !important;
+}
+
+/* Remove Streamlit's default sidebar top padding which pushes MPT down */
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"] {
+    padding-top: 0 !important;
 }
 
 section[data-testid="stSidebar"] {
@@ -544,7 +556,18 @@ section[data-testid="stSidebar"] > div:first-child {
 }
 
 section[data-testid="stSidebar"] hr {
-    margin: 0.5rem 0 !important;
+    display: none !important;
+}
+
+section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    border: none !important;
+    border-radius: 8px !important;
+}
+
+section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"]:focus-within {
+    border: none !important;
+    box-shadow: none !important;
 }
 
 section[data-testid="stSidebar"] button[kind="secondary"],
@@ -552,6 +575,7 @@ section[data-testid="stSidebar"] button[kind="primary"] {
     display: flex !important;
     justify-content: flex-start !important;
     text-align: left !important;
+    border: none !important;
 }
 
 section[data-testid="stSidebar"] button[kind="secondary"] > div,
@@ -634,23 +658,60 @@ div[class*="st-key-home_video_"] button[kind="secondary"] span[data-has-shortcut
 
 /* --- Page Header --- */
 div[class*="st-key-page_header"] {
-    min-height: 56px !important;
-    max-height: 56px !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    max-height: 64px !important;
     overflow: hidden !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
     margin-bottom: 1rem !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+div[class*="st-key-page_header"] > div[data-testid="stVerticalBlock"] {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+}
+
+div[class*="st-key-page_header"] div[data-testid="stHorizontalBlock"] {
+    align-items: center !important;
+    height: 100% !important;
 }
 
 div[class*="st-key-page_header"] h1,
 div[class*="st-key-page_header"] h2,
+div[class*="st-key-page_header"] h3,
 div[class*="st-key-page_header"] [data-testid="stHeading"] {
     margin: 0 !important;
     padding: 0 !important;
     font-size: 1.5rem !important;
+    line-height: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+div[class*="st-key-page_header"] [data-testid="stMarkdownContainer"] {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
 }
 
 div[class*="st-key-page_header"] [data-testid="stElementContainer"] {
     margin: 0 !important;
+    padding: 0 !important;
+}
+
+div[class*="st-key-page_header"] button {
+    margin: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+div[class*="st-key-page_header"] button p {
+    font-size: 1rem !important;
 }
 
 /* ==========================================================================
@@ -728,6 +789,7 @@ div[class*="st-key-home_video_"] video:hover {
 }
 
 /* 7. Always Show Sidebar (Luôn hiển thị menu bar) */
+[data-testid="stSidebarHeader"],
 [data-testid="stSidebarCollapseButton"],
 section[data-testid="stSidebar"] button[kind="headerNoPadding"],
 [data-testid="collapsedControl"] {
