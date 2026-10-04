@@ -624,7 +624,11 @@ section[data-testid="stSidebar"] button[kind="primary"] span[data-has-shortcut] 
 
 /* --- Wizard Stepper --- */
 div[class*="st-key-wizard_stepper"] {
+    margin-top: -1.5rem !important;
     margin-bottom: 1rem !important;
+    border-right: 1px solid rgba(128, 128, 128, 0.2) !important;
+    padding-right: 2rem !important;
+    min-height: calc(100vh - 130px) !important;
 }
 
 div[class*="st-key-wizard_stepper"] button {
@@ -634,7 +638,8 @@ div[class*="st-key-wizard_stepper"] button {
 
 div[class*="st-key-wizard_nav"] {
     margin-top: 1.5rem !important;
-    padding-top: 1rem !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
     border-top: 1px solid rgba(128, 128, 128, 0.2) !important;
 }
 
@@ -712,7 +717,7 @@ div[class*="st-key-home_video_create"] button[kind="secondary"]:hover::after {
     color: rgba(255, 255, 255, 0.8);
 }
 
-div[class*="st-key-home_video_create"] button[kind="secondary"] p {
+div[class*="st-key-home_video_create"] button[kind="secondary"] > div {
     display: none !important;
 }
 
@@ -900,5 +905,44 @@ section[data-testid="stSidebar"] {
     display: block !important;
     visibility: visible !important;
     transform: none !important;
+}
+
+
+
+/* 8. Wizard Layout Polish */
+div[class*="st-key-wizard_step_btn_"] button {
+    padding-left: 1rem !important;
+}
+
+div[class*="st-key-wizard_step_btn_"] button > div {
+    display: flex !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+}
+
+div[class*="st-key-wizard_step_btn_"] button div[data-testid="stMarkdownContainer"],
+div[class*="st-key-wizard_step_btn_"] button div[data-testid="stMarkdownContainer"] p {
+    flex-grow: 0 !important;
+    width: auto !important;
+    text-align: left !important;
+    margin-left: 0.5rem !important;
+}
+
+div[class*="st-key-main_settings_grid"] {
+    margin-top: -1.5rem !important;
+    max-height: calc(100vh - 130px) !important;
+    min-height: calc(100vh - 130px) !important;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+div[class*="st-key-main_settings_grid"] > div[data-testid="stVerticalBlock"] {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100% !important;
+}
+
+div[class*="st-key-main_settings_grid"] div[class*="st-key-wizard_nav"] {
+    margin-top: auto !important;
 }
 

@@ -4907,7 +4907,7 @@ def _render_loomloom_script_generation(params):
 def _render_script_settings(panel, params):
     """渲染文案设置并更新生成参数。"""
     with panel:
-        with st.container(border=True):
+        with st.container(border=False):
             st.write(tr("Video Script Settings"))
             # 标签行需要容纳“配置大模型”入口，因此无法继续使用 text_area
             # 内置标签。把标签和输入框收进同一个字段容器后，可覆盖内部间距，
@@ -5103,7 +5103,7 @@ def _render_video_settings(panel, params):
     """渲染视频设置并返回本次选择的本地素材。"""
     uploaded_files = []
     with panel:
-        with st.container(border=True):
+        with st.container(border=False):
             st.write(tr("Video Settings"))
             video_concat_modes = [
                 (tr("Sequential"), "sequential"),
@@ -6794,7 +6794,7 @@ def _render_background_music_settings(params, elevenlabs_api_key_rendered=False)
 def _render_audio_settings(panel, params):
     """渲染音频设置并返回上传音频与当前配音模式。"""
     with panel:
-        with st.container(border=True):
+        with st.container(border=False):
             st.write(tr("Audio Settings"))
 
             # 配音方式是音频设置的一级状态，负责明确区分自动配音、用户上传和无配音。
@@ -7498,7 +7498,7 @@ def _render_audio_settings(panel, params):
 def _render_subtitle_settings(panel, params):
     """渲染字幕设置并更新生成参数。"""
     with panel:
-        with st.container(border=True):
+        with st.container(border=False):
             st.write(tr("Subtitle Settings"))
             st.session_state.setdefault(
                 "subtitle_enabled_checkbox",
@@ -8299,15 +8299,7 @@ def _render_sidebar():
             _navigate_to("home")
             st.rerun()
 
-        if st.button(
-            tr("New Video"),
-            key="nav_create",
-            icon=":material/add_circle:",
-            use_container_width=True,
-            type="primary" if current_page == "create" else "secondary",
-        ):
-            _navigate_to_create()
-            st.rerun()
+
 
         if st.button(
             tr("Tasks"),
@@ -8363,7 +8355,7 @@ def _render_home_page():
         for col, task in zip(cols, row_items):
             with col:
                 if task.get("type") == "create":
-                    with st.container(border=True, key="home_video_create"):
+                    with st.container(border=False, key="home_video_create"):
                         if st.button(
                             " ",
                             key="home_create_btn_inner",
@@ -8431,27 +8423,26 @@ WIZARD_STEPS = [
 
 def _render_wizard_stepper(current_step):
     step_labels = [tr(label) for label in WIZARD_STEPS]
-    cols = st.columns(len(step_labels))
-    for i, (col, label) in enumerate(zip(cols, step_labels)):
-        with col:
-            if i < current_step:
-                icon = ":material/check_circle:"
-                btn_type = "tertiary"
-            elif i == current_step:
-                icon = ":material/radio_button_checked:"
-                btn_type = "primary"
-            else:
-                icon = ":material/radio_button_unchecked:"
-                btn_type = "tertiary"
-            if st.button(
-                label,
-                key=f"wizard_step_btn_{i}",
-                icon=icon,
-                type=btn_type,
-                use_container_width=True,
-            ):
-                _wizard_go_to(i)
-                st.rerun()
+    for i, label in enumerate(step_labels):
+        numbered_label = f"{i + 1}. {label}"
+        if i < current_step:
+            icon = ":material/check_circle:"
+            btn_type = "tertiary"
+        elif i == current_step:
+            icon = ":material/radio_button_checked:"
+            btn_type = "primary"
+        else:
+            icon = ":material/radio_button_unchecked:"
+            btn_type = "tertiary"
+        if st.button(
+            numbered_label,
+            key=f"wizard_step_btn_{i}",
+            icon=icon,
+            type=btn_type,
+            use_container_width=True,
+        ):
+            _wizard_go_to(i)
+            st.rerun()
 
 
 def _render_create_page():
@@ -8470,75 +8461,78 @@ def _render_create_page():
 
     current_step = st.session_state.get("wizard_step", 0)
 
-    hide_steps_css = ""
-    for i in range(4):
-        if i != current_step:
-            hide_steps_css += f'div[class*="st-key-wizard_step_{i}"] {{ display: none !important; }}\n'
-    st.markdown(f"<style>{hide_steps_css}</style>", unsafe_allow_html=True)
+    wizard_layout = st.columns([1, 3], gap="large")
 
-    with st.container(key="wizard_stepper"):
-        _render_wizard_stepper(current_step)
+    with wizard_layout[0]:
+        with st.container(key="wizard_stepper"):
+            hide_steps_css = ""
+            for i in range(4):
+                if i != current_step:
+                    hide_steps_css += f'div[class*="st-key-wizard_step_{i}"] {{ display: none !important; }}\n'
+            st.markdown(f"<style>{hide_steps_css}</style>", unsafe_allow_html=True)
+            _render_wizard_stepper(current_step)
 
-    params = VideoParams(video_subject="")
-    params.match_materials_to_script = bool(
-        st.session_state.get("match_materials_to_script", False)
-    )
-
-    with st.container(key="main_settings_grid"):
-        with st.container(key="wizard_step_0"):
-            step0_panel = st.columns(1)[0]
-            _render_script_settings(step0_panel, params)
-
-        with st.container(key="wizard_step_1"):
-            step1_panel = st.columns(1)[0]
-            uploaded_files = _render_video_settings(step1_panel, params)
-
-        with st.container(key="wizard_step_2"):
-            step2_panel = st.columns(1)[0]
-            uploaded_audio_file, uploaded_bgm_file, voice_mode = _render_audio_settings(
-                step2_panel, params
-            )
-
-        with st.container(key="wizard_step_3"):
-            step3_panel = st.columns(1)[0]
-            _render_subtitle_settings(step3_panel, params)
-
-    with st.container(key="wizard_nav"):
-        nav_cols = st.columns([1, 3, 1])
-        with nav_cols[0]:
-            if current_step > 0:
-                if st.button(
-                    tr("Previous"),
-                    key="wizard_prev",
-                    icon=":material/arrow_back:",
-                    use_container_width=True,
-                ):
-                    _wizard_prev()
-                    st.rerun()
-        with nav_cols[2]:
-            if current_step < 3:
-                if st.button(
-                    tr("Next"),
-                    key="wizard_next",
-                    icon=":material/arrow_forward:",
-                    type="primary",
-                    use_container_width=True,
-                ):
-                    _wizard_next()
-                    st.rerun()
-
-    if current_step == 3:
-        generation_submitted = _render_generation_controls(
-            params,
-            uploaded_files,
-            uploaded_audio_file,
-            uploaded_bgm_file,
-            voice_mode,
+    with wizard_layout[1]:
+        params = VideoParams(video_subject="")
+        params.match_materials_to_script = bool(
+            st.session_state.get("match_materials_to_script", False)
         )
-        if not generation_submitted:
+
+        with st.container(key="main_settings_grid"):
+            with st.container(key="wizard_step_0"):
+                step0_panel = st.columns(1)[0]
+                _render_script_settings(step0_panel, params)
+
+            with st.container(key="wizard_step_1"):
+                step1_panel = st.columns(1)[0]
+                uploaded_files = _render_video_settings(step1_panel, params)
+
+            with st.container(key="wizard_step_2"):
+                step2_panel = st.columns(1)[0]
+                uploaded_audio_file, uploaded_bgm_file, voice_mode = _render_audio_settings(
+                    step2_panel, params
+                )
+
+            with st.container(key="wizard_step_3"):
+                step3_panel = st.columns(1)[0]
+                _render_subtitle_settings(step3_panel, params)
+
+            with st.container(key="wizard_nav"):
+                nav_cols = st.columns([1, 3, 1])
+                with nav_cols[0]:
+                    if current_step > 0:
+                        if st.button(
+                            tr("Previous"),
+                            key="wizard_prev",
+                            icon=":material/arrow_back:",
+                            use_container_width=True,
+                        ):
+                            _wizard_prev()
+                            st.rerun()
+                with nav_cols[2]:
+                    if current_step < 3:
+                        if st.button(
+                            tr("Next"),
+                            key="wizard_next",
+                            icon=":material/arrow_forward:",
+                            type="primary",
+                            use_container_width=True,
+                        ):
+                            _wizard_next()
+                            st.rerun()
+
+        if current_step == 3:
+            generation_submitted = _render_generation_controls(
+                params,
+                uploaded_files,
+                uploaded_audio_file,
+                uploaded_bgm_file,
+                voice_mode,
+            )
+            if not generation_submitted:
+                _save_runtime_config()
+        else:
             _save_runtime_config()
-    else:
-        _save_runtime_config()
 
 
 def _render_application():
